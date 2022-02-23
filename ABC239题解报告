@@ -1,0 +1,162 @@
+# A - Horizon
+### 思路
+直接使用C++自带的sqrt函数即可。
+### 代码
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+inline int R(){
+	int x=0,f=1;char ch=getchar();
+	while(!isdigit(ch)){if(ch=='-')f=-1;ch=getchar();}
+	while(isdigit(ch)){x=(x<<1)+(x<<3)+(ch&15);ch=getchar();}return x*f;
+}
+int main(){
+	long long x=R();
+	printf("%.9Lf",(long double)sqrt(x*(12800000+x)));
+}
+```
+
+# B - Integer Division
+### 思路
+小分类讨论：
+
+- $x\equiv 0\pmod{10}$：最优情况，直接输出 $\dfrac{x}{10}$ 即可。
+- $x\ge 0$：直接输出 $\dfrac{x}{10}$ 即可（利用C++的整除）。
+- $x<0$：由于是负数，不能利用C++的整除（whk里应该学过关于负数的整数部分），输出 $\dfrac{x}{10}-1$。
+
+
+### 代码
+```cpp
+#include<bits/stdc++.h>
+#define int long long
+using namespace std;
+inline int R(){
+	int x=0,f=1;char ch=getchar();
+	while(!isdigit(ch)){if(ch=='-')f=-1;ch=getchar();}
+	while(isdigit(ch)){x=(x<<1)+(x<<3)+(ch&15);ch=getchar();}return x*f;
+}
+signed main(){
+	int x=R();
+	if(x>=0||x%10==0) printf("%lld",x/10);
+	else printf("%lld",x/10-1);
+}
+```
+
+# C - Knight Fork
+### 思路
+
+![](https://cdn.luogu.com.cn/upload/image_hosting/sq93op3o.png)
+
+设点 A（红点）为输入的其中一个点，我们只需要判断另一个点是不是其中一个灰点，如果是输出 Yes，否则输出 No。
+
+### 代码
+
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+inline int R(){
+	int x=0,f=1;char ch=getchar();
+	while(!isdigit(ch)){if(ch=='-')f=-1;ch=getchar();}
+	while(isdigit(ch)){x=(x<<1)+(x<<3)+(ch&15);ch=getchar();}return x*f;
+}
+int dx[33]={0,1,1,-1,-1,3,3,-3,-3,2,0,-2,0,4,0,-4,0,3,3,-3,-3,1,1,-1,-1,4,4,-4,-4,2,2,-2,-2};
+int dy[33]={0,1,-1,1,-1,3,-3,3,-3,0,2,0,-2,0,4,0,-4,1,-1,1,-1,3,1,-3,-1,2,-2,2,-2,4,-4,4,-4};
+int main(){
+	int a=R(),b=R(),c=R(),d=R();
+	for(int i=1;i<=32;i++){
+		int tx=a+dx[i],ty=b+dy[i];
+		if(tx==c&&ty==d){
+			printf("Yes");
+			return 0;
+		}
+	}
+	printf("No");
+}
+```
+# D - Prime Sum Game
+### 思路
+暴力枚举 $i\in[A,B]$ 中是否满足 $\forall j\in[C,D],i+j$ 为素数。如果存在至少一个 $i$，第一个小日本胜；否则第二个小日本胜。
+### 代码
+```cpp
+#include<bits/stdc++.h>
+#define int long long
+using namespace std;
+inline int R(){
+	int x=0,f=1;char ch=getchar();
+	while(!isdigit(ch)){if(ch=='-')f=-1;ch=getchar();}
+	while(isdigit(ch)){x=(x<<1)+(x<<3)+(ch&15);ch=getchar();}return x*f;
+}
+signed main(){
+	int a=R(),b=R(),c=R(),d=R();
+	bool f=1;
+	for(int i=a;i<=b;i++){
+		bool g=1;
+		for(int j=c;j<=d;j++){
+			bool h=1;
+			for(int k=2;k*k<=i+j;k++){
+				if((i+j)%k==0){
+					h=0;
+					break;
+				}
+			}
+			if(h) break;
+			else if(j==d&&!h) g=0;
+		}
+		if(!g){
+			f=0;
+			break;
+		}
+	}
+	if(!f) printf("Takahashi");
+	else printf("Aoki");
+}
+
+```
+
+# E - Subtree K-th Max
+### 思路
+由于 $K_i$ 很小，所以我们考虑暴力判断第 k 小。
+
+考虑递归从叶子结点往上遍历其父亲节点，设一节点已经被它所有的儿子节点遍历到，我们只需要将这些节点的**前20名**加入到这个节点的排名中，再排序，最后删掉**20名往后的**，继续递归。
+
+### 代码
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+const int N=1e5+5;
+int n,q,w[N];
+vector<int>f[N],G[N];
+bool cmp(int x,int y){
+	return x>y;
+}
+void dfs(int x,int y){
+	for(int u:G[x]){
+		if(u!=y){
+			dfs(u,x);
+			for(int i:f[u]){
+				f[x].push_back(i);
+			}
+		}
+	}
+	sort(f[x].begin(),f[x].end(),cmp);
+	if(f[x].size()>20) f[x].erase(f[x].begin()+20,f[x].end());
+}
+int main(){
+	ios::sync_with_stdio(false);
+	cin>>n>>q;
+	for(int i=1;i<=n;i++){
+		cin>>w[i];
+		f[i].push_back(w[i]);
+	} 
+	for(int i=1,x,y;i<n;i++){
+		cin>>x>>y;
+		G[x].push_back(y);
+		G[y].push_back(x);
+	}
+	dfs(1,0);
+	for(int i=1,x,y;i<=q;i++){
+		cin>>x>>y;
+		cout<<f[x][y-1]<<'\n';
+	}
+} 
+```
